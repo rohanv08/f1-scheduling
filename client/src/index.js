@@ -1,41 +1,15 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import {
-	BrowserRouter as Router,
-	Route,
-	Switch
-} from 'react-router-dom';
+import React from "react";
+import { createRoot } from "react-dom/client"
+import { BrowserRouter } from "react-router-dom"
+import App from "./App";
+import "./styles.css";
 
-import HomePage from './pages/HomePage';
-import PlayersPage from './pages/PlayersPage';
-import 'antd/dist/antd.css';
 
-import "bootstrap/dist/css/bootstrap.min.css";
-import "shards-ui/dist/css/shards.min.css"
-import MatchesPage from './pages/MatchesPage';
+const rootElement = document.getElementById("app");
+const root = createRoot(rootElement);
 
-ReactDOM.render(
-  <div>
-    <Router>
-      <Switch>
-        <Route exact
-							path="/"
-							render={() => (
-								<HomePage />
-							)}/>
-        <Route exact
-							path="/players"
-							render={() => (
-								<PlayersPage />
-							)}/>
-        <Route exact
-							path="/matches"
-							render={() => (
-								<MatchesPage />
-							)}/>
-      </Switch>
-    </Router>
-  </div>,
-  document.getElementById('root')
+root.render(
+    <BrowserRouter>
+        <App name="World!" />
+    </BrowserRouter>
 );
-

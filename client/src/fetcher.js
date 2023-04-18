@@ -1,54 +1,98 @@
 import config from './config.json'
+require("babel-polyfill");
 
-const getAllMatches = async (page, pagesize, league) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/matches/${league}?page=${page}&pagesize=${pagesize}`, {
-        method: 'GET',
-    })
-    return res.json()
+export async function queryBackend(route, params={}) {
+    params = Object.fromEntries(Object.entries(params).filter(([_, value]) => value !== undefined));
+    const res = await fetch(`http://${config.server_host}:${config.server_port}/${route}?` + new URLSearchParams(params));
+    if (res.status === 200) return res.json();
+    if (res.status === 400) throw await res.text();
+    console.warn("server returned " + res.status + ": " + await res.text());
 }
 
 const getAllPlayers = async (page, pagesize) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/players?page=${page}&pagesize=${pagesize}`, {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/players?result_pos=${page}&result_size=${pagesize}`, {
         method: 'GET',
     })
+    if (res.status === 200) {
     return res.json()
+    } else if (res.status === 400) {
+        return null
+    }
 }
 
-const getMatch = async (id) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/match?id=${id}`, {
+const getSortedPlayers = async (page, pagesize, sort_by, order) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/players?result_pos=${page}&result_size=${pagesize}&sort_by=${sort_by}&order=${order}`, {
         method: 'GET',
     })
+    if (res.status === 200) {
     return res.json()
+    } else if (res.status === 400) {
+        return null
+    }
 }
 
 const getPlayer = async (id) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/player?id=${id}`, {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/${id}/stats`, {
         method: 'GET',
     })
-    return res.json()
-}
+    if (res.status === 200) {
+        return res.json()
+        } else if (res.status === 400) {
+            return null
+        }
+    }
 
-const getMatchSearch = async (home, away, page, pagesize) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/search/matches?Home=${home}&Away=${away}&page=${page}&pagesize=${pagesize}`, {
+const getPlayerMatches = async (id, page, pagesize) => {
+    var res = await fetch(`http://${config.server_host}:${config.server_port}/${id}/matches?result_pos=${page}&result_size=${pagesize}`, {
         method: 'GET',
     })
-    return res.json()
-}
+    if (res.status === 200) {
+        return res.json()
+        } else if (res.status === 400) {
+            return null
+        }
+    }
 
-const getPlayerSearch = async (name, nationality, club, rating_high, rating_low, pot_high, pot_low, page, pagesize) => {
-    var res = await fetch(`http://${config.server_host}:${config.server_port}/search/players?Name=${name}&Nationality=${nationality}&Club=${club}&RatingLow=${rating_low}&RatingHigh=${rating_high}&PotentialHigh=${pot_high}&PotentialLow=${pot_low}&page=${page}&pagesize=${pagesize}`, {
-        method: 'GET',
-    })
-    return res.json()
-}
+    const getAllTournaments = async (page, pagesize, city, eventID, min, max, before, after) => {
+        if (min == null) {
+            min = 0;
+        }
+        if (max == null) {
+            max = 10000;
+        }
+        if (before == null) {
+            before = "2100-01-01"
+        }
+        if (after == null) {
+            after = "1900-01-01"
+        }
+        var res = await fetch(`http://${config.server_host}:${config.server_port}/tournaments?result_pos=${page}&result_size=${pagesize}&city_name=${city}&event_name=${eventID}&min_rating=${min}&max_rating=${max}&before=${before}&after=${after}`, {
+            method: 'GET',
+        })
+        if (res.status === 200) {
+        return res.json()
+        } else if (res.status === 400) {
+            return null
+        }
+    }
 
+    const getTournamentStandings = async (eventID, siteID) => {
+        var res = await fetch(`http://${config.server_host}:${config.server_port}/tournaments/${eventID}/${siteID}/standings`, {
+            method: 'GET',
+        })
+        if (res.status === 200) {
+        return res.json()
+        } else if (res.status === 400) {
+            return null
+        }
+    }
 
 
 export {
-    getAllMatches,
     getAllPlayers,
-    getMatch,
+    getSortedPlayers,
     getPlayer,
-    getMatchSearch,
-    getPlayerSearch
+    getPlayerMatches,
+    getAllTournaments,
+    getTournamentStandings
 }
