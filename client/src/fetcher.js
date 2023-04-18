@@ -44,16 +44,6 @@ const getPlayerSearch = async (name, nationality, club, rating_high, rating_low,
 
 
 
-
-
-
-
-
-
-
-
-
-
 export {
     getAllMatches,
     getAllPlayers,
