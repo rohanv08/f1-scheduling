@@ -1,17 +1,17 @@
 import sys
 from ortools.sat.python import cp_model
 import random
+import pickle
 
 
 #Constants to be filled from front-end/weather from file
-start_date = 1
-end_date = 50
+start_date = 90
+end_date = 270
 number_of_races = 20
-number_of_tracks = 100
 number_of_teams = 20
-tracks = [f'track-{i}' for i in range(number_of_tracks)]
 teams = [f'team-{i}' for i in range(number_of_teams)]
-weather = {}
+weather = pickle.load(open('weather.pkl', 'wb'))
+tracks = weather.keys()
 tt_preference = {}
 at_preference = {}
 
@@ -20,7 +20,6 @@ for i in range(len(teams)):
 
 for i in tracks:
     at_preference[i] = random.randint(1,10)
-    weather[i] = [-abs(random.randint(-5, 40) - 25) for _ in range(365)]
 
 
 # Solver
