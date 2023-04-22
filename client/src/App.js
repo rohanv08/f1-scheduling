@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Routes, Route, Link } from "react-router-dom";
-import AnalysisPage from "./components/pages/analysis/AnalysisPage";
+import AnalysisPage from "./components/AnalysisPage";
 
 const App = props => {
   return (
