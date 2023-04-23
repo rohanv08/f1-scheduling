@@ -6,7 +6,7 @@ import pandas as pd
 from geopy.distance import geodesic
 
 
-MAX_RUNTIME = 180
+MAX_RUNTIME = 120
 INT_MIN = -10000
 INT_MAX = 10000
 #Constants to be filled from front-end/weather from file
@@ -14,16 +14,19 @@ NUMBER_OF_RACES = 10
 START_WEEK = 1
 END_WEEK = START_WEEK + NUMBER_OF_RACES
 NUMBER_OF_TEAMS = 10
+OPTIMUM_WEATHER = 23
+
+
 teams = [f'team-{i}' for i in range(NUMBER_OF_TEAMS)]
 
 #Weather
-temp = pickle.load(open('./weather.pkl', 'rb'))
+temp = pickle.load(open('./solver/weather.pkl', 'rb'))
 tracks = list(temp.keys())
 weather = {}
 for key, value in temp.items():
-    weather[key] = [-abs(int(i) - 23) for i in value]
+    weather[key] = [-abs(int(i) - OPTIMUM_WEATHER) for i in value]
 ####
-lat_lng = pd.read_csv('circuits.csv')
+lat_lng = pd.read_csv('./solver/circuits.csv')
 lat_lng = lat_lng[['location', 'lat', 'lng']]
 lat_lng = lat_lng.drop_duplicates(subset='location')
 
@@ -41,9 +44,7 @@ for i in tracks:
 # Solver
 
 class Scheduler:
-    def __init__(self, START_WEEK, END_WEEK, tracks, teams, tt_preference, at_preference, weather) -> None:
-        self.START_WEEK = START_WEEK
-        self.END_WEEK = END_WEEK
+    def __init__(self, tracks, teams, tt_preference, at_preference, weather) -> None:
         self.track_names = tracks
         self.team_names = teams
         self.tt_preference_list = tt_preference
@@ -109,7 +110,7 @@ class Scheduler:
 
 
 
-
+        
     def score_and_maximize(self):
         tracks = self.track_names
         model = self.model
@@ -161,7 +162,8 @@ class Scheduler:
         output = self.solver.Solve(self.model)
         print(output)
         if (output == cp_model.OPTIMAL or output == cp_model.FEASIBLE):
-            soln = [(self.track_names[v], self.solver.Value(self.tracks_day[v])) for v in range(len(self.track_names)) if self.solver.Value(self.tracks_chosen[v]) == 1] 
+            soln = [(self.track_names[v], self.solver.Value(self.tracks_day[v]), self.weather_list[self.track_names[v]][self.solver.Value(self.tracks_day[v])] + OPTIMUM_WEATHER, 0 if v == len(self.track_names) -1 else 
+                     self.distances[self.track_names[v]][self.track_names[v+1]]*-100) for v in range(len(self.track_names)) if self.solver.Value(self.tracks_chosen[v]) == 1] 
             obj_val = self.solver.ObjectiveValue()
             soln.sort(key=lambda a: a[1])
             return soln, obj_val
@@ -169,10 +171,6 @@ class Scheduler:
             raise ValueError('Not possible!')
 
 
-scheduler = Scheduler(START_WEEK, END_WEEK, tracks, teams, tt_preference, at_preference, weather)
+scheduler = Scheduler(tracks, teams, tt_preference, at_preference, weather)
 print(scheduler.solve())
-
-
-#print("testing executing through node " + sys.argv[1])
-#print("sending data back")
-#sys.stdout.flush()
+sys.stdout.flush()
