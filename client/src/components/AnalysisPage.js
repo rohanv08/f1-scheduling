@@ -7,7 +7,6 @@ import meta from '../data/meta.json';
 import { Button} from 'react-bootstrap';
 
 
-
 const AnalysisPage = props => {  
     const [characters, updateCharacters] = useState(circuits);
     const [label, updateLabel] = useState(0);
@@ -88,7 +87,7 @@ const AnalysisPage = props => {
           onChange = {(e) => updateStart(e.target["value"])}/>
         &nbsp; Number of Races: <input name="races"
           value={race}
-          type="number" step="1" min = "1" max = "52"
+          type="number" step="1" min = "0" max = {51-start}
           onChange = {(e) => updateRace(e.target["value"])}/>
 
             <Select options={countries} onChange={handleChange} defaultValue={countries[label]}/>
