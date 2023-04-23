@@ -39,28 +39,56 @@ const AnalysisPage = props => {
       }  
     
     return (
-            <DragDropContext onDragEnd={handleOnDragEnd}>
-              <Droppable droppableId="characters">
-                {(provided) => (
-                  <ul className="characters" {...provided.droppableProps} ref={provided.innerRef}>
-                    {characters.map(({id, name}, index) => {
-                      return (
-                        <Draggable key={id} draggableId={id} index={index}>
-                          {(provided) => (
-                            <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                              <p>
-                                { name }
-                              </p>
-                            </li>
-                          )}
-                        </Draggable>
-                      );
-                    })}
-                    {provided.placeholder}
-                  </ul>
-                )}
-              </Droppable>
-            </DragDropContext>
+          <table>
+            <tr><td>
+              <DragDropContext onDragEnd={handleOnDragEnd}>
+                <Droppable droppableId="characters">
+                  {(provided) => (
+                    <ol className="characters" {...provided.droppableProps} ref={provided.innerRef}>
+                      {characters.map(({id, name}, index) => {
+                        return (
+                          <Draggable key={id} draggableId={id} index={index}>
+                            {(provided) => (
+                              <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                                <p>
+                                  { name }
+                                </p>
+                              </li>
+                            )}
+                          </Draggable>
+                        );
+                      })}
+                      {provided.placeholder}
+                    </ol>
+                  )}
+                </Droppable>
+              </DragDropContext>
+            </td>
+            <td>
+              <DragDropContext onDragEnd={handleOnDragEnd}>
+                <Droppable droppableId="characters">
+                  {(provided) => (
+                    <ol className="characters" {...provided.droppableProps} ref={provided.innerRef}>
+                      {characters.map(({id, name}, index) => {
+                        return (
+                          <Draggable key={id} draggableId={id} index={index}>
+                            {(provided) => (
+                              <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                                <p>
+                                  { name }
+                                </p>
+                              </li>
+                            )}
+                          </Draggable>
+                        );
+                      })}
+                      {provided.placeholder}
+                    </ol>
+                  )}
+                </Droppable>
+              </DragDropContext>
+            </td></tr>
+          </table>
       );    
 };
 
