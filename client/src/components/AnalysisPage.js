@@ -3,12 +3,14 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Select from 'react-select';
 import countries from '../data/teams.json';
 import circuits from '../data/circuits.json';
+import meta from '../data/meta.json';
 
 
 
 const AnalysisPage = props => {  
     const [characters, updateCharacters] = useState(circuits);
     const [label, updateLabel] = useState(0);
+    const [preferences, updatePreferences] = useState(meta);
   
     function handleOnDragEnd(result) {
       if (!result.destination) return;
@@ -21,10 +23,53 @@ const AnalysisPage = props => {
       total[label] = items
       updateCharacters(total);
     }
-          
+
+
+    function handlePrefChange(e, trackName) {
+      const { name, value } = e.target
+      if (name === "lat"){
+        if (value > 90) {
+          callPreferences(trackName, name, 90);
+        }
+        else if (value < -90) {
+          callPreferences(trackName, name, -90);
+        }
+        callPreferences(trackName, name, value);
+      } else if (name == "lng") {
+        if (value > 180) {
+          callPreferences(trackName, name, 180);
+        }
+        else if (value < -180) {
+          callPreferences(trackName, name, -180);
+        }
+        callPreferences(trackName, name, value);
+      } else {
+        if (value > 10) {
+          callPreferences(trackName, name, 10);
+        }
+        else if (value < 1) {
+          callPreferences(trackName, name, 1);
+        }
+        callPreferences(trackName, name, value);
+      }
+    }
+
+    function callPreferences(trackName, name, value) {
+      if (name === "pref"){
+        const tempMeta = {...preferences};
+        tempMeta[trackName][name] = Number.parseInt(value, 10)
+        updatePreferences(tempMeta);
+      } else {
+        const tempMeta = {...preferences};
+        tempMeta[trackName][name] = value
+        updatePreferences(tempMeta);  
+      }
+      this.forceUpdate();
+    }
+
     function handleChange(e){
       updateLabel(e.value)
-      }
+    }
            
     
     return (
@@ -34,22 +79,43 @@ const AnalysisPage = props => {
             <DragDropContext onDragEnd={handleOnDragEnd}>
               <Droppable droppableId="characters">
                 {(provided) => (
-                  <ol className="characters" {...provided.droppableProps} ref={provided.innerRef}>
+                  <table cellPadding={5} className="characters" {...provided.droppableProps} ref={provided.innerRef}>
+                    <thead align = 'center'><tr><th>Index</th><th>Track</th><th>Latitude</th><th>Longitude</th><th>Audience Preferences</th></tr></thead>
+                    <tbody>
                     {characters[label].map((name, index) => {
                       return (
                         <Draggable key={name} draggableId={name} index={index}>
                           {(provided) => (
-                            <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                              <p>
-                                { name }
-                              </p>
-                            </li>
+                            <tr align = 'center'><td>{index+1}</td>
+                            <td ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                                {name}
+                            </td>
+                            <td>
+                              <input name="lat"
+                                value={preferences[name]["lat"]}
+                                type="number" step="0.0001" min = "-90" max = "90"
+                                onChange = {(e) => handlePrefChange(e, name)}/>
+                            </td>
+                            <td>
+                              <input name="lng"
+                                value={preferences[name]["lng"]}
+                                type="number" step="0.0001" min = "-180" max = "180"
+                                onChange = {(e) => handlePrefChange(e, name)}/>
+                            </td>
+                            <td>
+                              <input name="pref"
+                                value={preferences[name]["pref"]}
+                                type="number" step="1" min = "1" max = "10"
+                                onChange = {(e) => handlePrefChange(e, name)}/>
+                            </td>                            
+                            </tr>
                           )}
                         </Draggable>
                       );
                     })}
+                    </tbody>
                     {provided.placeholder}
-                  </ol>
+                  </table>
                 )}
               </Droppable>
             </DragDropContext>
