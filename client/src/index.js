@@ -10,6 +10,6 @@ const root = createRoot(rootElement);
 
 root.render(
     <BrowserRouter>
-        <App name="World!" />
+        <App name="Formula 1 Scheduling" />
     </BrowserRouter>
 );
