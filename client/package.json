@@ -24,6 +24,7 @@
     "react-chartjs-2": "^4.1.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.3.0",
+    "react-select": "^5.7.2",
     "src": "^1.1.2"
   },
   "devDependencies": {
