@@ -4,6 +4,7 @@ import Select from 'react-select';
 import countries from '../data/teams.json';
 import circuits from '../data/circuits.json';
 import meta from '../data/meta.json';
+import { Button} from 'react-bootstrap';
 
 
 
@@ -11,6 +12,8 @@ const AnalysisPage = props => {
     const [characters, updateCharacters] = useState(circuits);
     const [label, updateLabel] = useState(0);
     const [preferences, updatePreferences] = useState(meta);
+    const [start, updateStart] = useState(15);
+    const [race, updateRace] = useState(10);
   
     function handleOnDragEnd(result) {
       if (!result.destination) return;
@@ -74,6 +77,20 @@ const AnalysisPage = props => {
     
     return (
       <div className="container">
+        <center><Button
+          variant="primary" type="button"
+          onClick={() => {console.log("Button Clicked!");
+          }} >Submit to Solver!</Button></center><br></br>
+
+        Start Week: <input name="start"
+          value={start}
+          type="number" step="1" min = "1" max = "52"
+          onChange = {(e) => updateStart(e.target["value"])}/>
+        &nbsp; Number of Races: <input name="races"
+          value={race}
+          type="number" step="1" min = "1" max = "52"
+          onChange = {(e) => updateRace(e.target["value"])}/>
+
             <Select options={countries} onChange={handleChange} defaultValue={countries[label]}/>
             <br></br>
             <DragDropContext onDragEnd={handleOnDragEnd}>

@@ -12,10 +12,12 @@
     "build-prod": "parcel build src/index.html"
   },
   "dependencies": {
+    "@types/react": "^18.0.38",
     "babel-polyfill": "^6.26.0",
-    "react": "^18.1.0",
+    "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
-    "react-dom": "^18.0.0",
+    "react-bootstrap": "^2.7.4",
+    "react-dom": "^18.2.0",
     "react-router-dom": "^6.3.0",
     "react-select": "^5.7.2"
   },
