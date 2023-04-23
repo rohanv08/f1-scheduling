@@ -123,8 +123,6 @@ class Scheduler:
 scheduler = Scheduler(start_date, end_date, tracks, teams, tt_preference, at_preference, weather)
 print(scheduler.solve())
 
-#print(weather)
-
 
 #print("testing executing through node " + sys.argv[1])
 #print("sending data back")
