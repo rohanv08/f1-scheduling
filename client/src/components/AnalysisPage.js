@@ -70,9 +70,8 @@ const AnalysisPage = props => {
             "number_of_races": race
           })
         }
-        fetchWithTimeout(server + 'submit', requestOptions, 200000).then((data) =>{
-          console.log(data)
-        })
+        fetchWithTimeout(server + 'submit', requestOptions, 200000).then((response) => response.json())
+        .then((json) => {console.log(json)})
 
     }
   

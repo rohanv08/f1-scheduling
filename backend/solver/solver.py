@@ -12,19 +12,20 @@ CURR_PATH = os.path.dirname(os.path.abspath(__file__))
 MAX_RUNTIME = 5
 INT_MIN = -10000
 INT_MAX = 10000
-NUMBER_OF_RACES = sys.argv[2] if len(sys.argv) >= 3 else 10
-START_WEEK = sys.argv[2] if len(sys.argv) >= 2 else 10
-END_WEEK = START_WEEK + NUMBER_OF_RACES
+print(sys.argv[1])
+NUMBER_OF_RACES = int(sys.argv[2])if len(sys.argv) >= 3 else 10
+START_WEEK = int(sys.argv[1]) if len(sys.argv) >= 2 else 10
+END_WEEK = START_WEEK + NUMBER_OF_RACES - 1
 OPTIMUM_WEATHER = 23
 
 with open(f'{CURR_PATH}/tt_preferences.json', 'r') as j:
-     tt_preference_raw = json.loads(j.read())
+        tt_preference_raw = json.loads(j.read())
 
 with open(f'{CURR_PATH}/teams.json', 'r') as j:
-     teams_raw = json.loads(j.read())
+    teams_raw = json.loads(j.read())
 
 with open(f'{CURR_PATH}/at_preferences.json', 'r') as j:
-     at_preference_raw = json.loads(j.read())
+    at_preference_raw = json.loads(j.read())
 
 NUMBER_OF_TRACKS = len(at_preference_raw)
 
@@ -38,7 +39,6 @@ tt_preference = {}
 at_preference = {}
 lat_lng = {}
 
-
 for i in range(len(tt_preference_raw)):
     tt_preference[teams[i]] = [0]*NUMBER_OF_TRACKS
     for j in range(NUMBER_OF_TRACKS):
@@ -49,16 +49,22 @@ for i in at_preference_raw.keys():
     lat_lng[i] = {'lat': at_preference_raw[i]['lat'], 'lng': at_preference_raw[i]['lng']}
 
 
-temp = pickle.load(open(f'{CURR_PATH}/weather.pkl', 'rb'))
+#weather_raw = pickle.load(open(f'{CURR_PATH}/weather.pkl', 'rb'))
 
 weather = {}
-for key, value in temp.items():
-    weather[key] = [-abs(int(i) - OPTIMUM_WEATHER) for i in value]
+weather_raw = {}
+# for key, value in temp.items():
+#     weather[key] = [-abs(int(i) - OPTIMUM_WEATHER) for i in value]
+
+for i in tracks:
+    weather_raw[i] = [random.randint(1,10) for _ in range(365)]
+
+for i in tracks:
+    weather[i] = [random.randint(1,10) for _ in range(365)]
 
 
 
 # Solver
-
 class Scheduler:
     def __init__(self, tracks, teams, tt_preference, at_preference, weather) -> None:
         self.track_names = tracks
@@ -182,17 +188,26 @@ class Scheduler:
 
         self.solver.parameters.max_time_in_seconds = MAX_RUNTIME
         output = self.solver.Solve(self.model)
-        print(output)
+        soln = {}
         if (output == cp_model.OPTIMAL or output == cp_model.FEASIBLE):
-            soln = [(self.track_names[v], self.solver.Value(self.tracks_day[v]), self.weather_list[self.track_names[v]][self.solver.Value(self.tracks_day[v])] + OPTIMUM_WEATHER, 0 if v == len(self.track_names) -1 else 
-                     self.distances[self.track_names[v]][self.track_names[v+1]]*-100) for v in range(len(self.track_names)) if self.solver.Value(self.tracks_chosen[v]) == 1] 
-            obj_val = self.solver.ObjectiveValue()
-            soln.sort(key=lambda a: a[1])
-            return soln, obj_val
+            for v in range(len(self.track_names)):
+                if self.solver.Value(self.tracks_chosen[v]) == 1:
+                    soln[self.solver.Value(self.tracks_day[v])] = {"track": self.track_names[v], "weather": weather_raw[self.track_names[v]][self.solver.Value(self.tracks_day[v])]}
+            keys = sorted(list(soln.keys()))
+            for i in range(len(keys)-1):
+                soln[keys[i]]['distance'] = self.distances[soln[keys[i]]['track']][soln[keys[i+1]]['track']]*-100
+            for i in range(1, 53):
+                if i not in keys:
+                    soln[i] = {}
+            soln["Score"] = self.solver.ObjectiveValue()
+            with open(f'{CURR_PATH}/solution.json', 'w') as fp:
+                json.dump(soln, fp)
+            print("Solution written to file!")
         else:
-            raise ValueError('Not possible!')
+            print("Not Possible or too little time")
 
 
 scheduler = Scheduler(tracks, teams, tt_preference, at_preference, weather)
-print(scheduler.solve())
+scheduler.solve()
 sys.stdout.flush()
+
