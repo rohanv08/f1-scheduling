@@ -12,7 +12,6 @@ CURR_PATH = os.path.dirname(os.path.abspath(__file__))
 MAX_RUNTIME = 5
 INT_MIN = -10000
 INT_MAX = 10000
-print(sys.argv[1])
 NUMBER_OF_RACES = int(sys.argv[2])if len(sys.argv) >= 3 else 10
 START_WEEK = int(sys.argv[1]) if len(sys.argv) >= 2 else 20
 END_WEEK = START_WEEK + NUMBER_OF_RACES - 1

@@ -2,8 +2,20 @@ const http = require('http')
 var express = require('express');
 var bodyParser = require('body-parser')
 var logger = require('morgan');
+var fs = require("fs")
 var ip = require("ip");
-console.dir ( ip.address() );
+
+const ip_details = {
+  "server_host": ip.address(),
+  "server_port":"8080"
+}
+const ip_details_json = JSON.stringify(ip_details);
+fs.writeFile('../client/src/config.json', ip_details_json, (error) => {
+    if (error) {
+      console.error(error);
+      throw error;
+  }
+})
 
 const port = 8080
 var app = express();
