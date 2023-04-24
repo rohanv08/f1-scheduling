@@ -2,6 +2,8 @@ const http = require('http')
 var express = require('express');
 var bodyParser = require('body-parser')
 var logger = require('morgan');
+var ip = require("ip");
+console.dir ( ip.address() );
 
 const port = 8080
 var app = express();
@@ -21,9 +23,16 @@ app.listen(port, function () {
 app.get('', (req, res) => {
   return res.redirect('/');
 });
+let allowCrossDomain = function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', "*");
+  res.header('Access-Control-Allow-Headers', "*");
+  next();
+}
+app.use(allowCrossDomain);
 
 app.use('/', inputRouter)
 app.use('/results', resultsRouter)
+
 
 
 // catch 404 and forward to error handler

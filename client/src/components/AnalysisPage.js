@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Select from 'react-select';
-import countries from '../data/teams.json';
+import teams from '../data/teams.json';
 import circuits from '../data/circuits.json';
 import meta from '../data/meta.json';
 import { Button} from 'react-bootstrap';
+import {fetchWithTimeout} from '../fetchWithTimeout'
+import config from '../config.json'
 
+const server = `http://${config.server_host}:${config.server_port}/`
 
 const AnalysisPage = props => {  
     const [characters, updateCharacters] = useState(circuits);
@@ -55,6 +58,24 @@ const AnalysisPage = props => {
         callPreferences(trackName, name, value);
       }
     }
+    function sendToSolver () {
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            "tt_preferences": characters,
+            "at_preferences": preferences,
+            "teams": teams,
+            "start_week": start,
+            "number_of_races": race
+          })
+        }
+        fetchWithTimeout(server + 'submit', requestOptions, 200000).then((data) =>{
+          console.log(data)
+        })
+
+    }
+  
 
     function callPreferences(trackName, name, value) {
       if (name === "pref"){
@@ -78,8 +99,7 @@ const AnalysisPage = props => {
       <div className="container">
         <center><Button
           variant="primary" type="button"
-          onClick={() => {console.log("Button Clicked!");
-          }} >Submit to Solver!</Button></center><br></br>
+          onClick={() => sendToSolver()} >Submit to Solver!</Button></center><br></br>
 
         Start Week: <input name="start"
           value={start}
@@ -90,7 +110,7 @@ const AnalysisPage = props => {
           type="number" step="1" min = "0" max = {51-start}
           onChange = {(e) => updateRace(e.target["value"])}/>
 
-            <Select options={countries} onChange={handleChange} defaultValue={countries[label]}/>
+            <Select options={teams} onChange={handleChange} defaultValue={teams[label]}/>
             <br></br>
             <DragDropContext onDragEnd={handleOnDragEnd}>
               <Droppable droppableId="characters">

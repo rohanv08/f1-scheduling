@@ -4,41 +4,57 @@ import random
 import pickle
 import pandas as pd
 from geopy.distance import geodesic
+import sys
+import json
+import os
 
-
-MAX_RUNTIME = 120
+CURR_PATH = os.path.dirname(os.path.abspath(__file__))
+MAX_RUNTIME = 5
 INT_MIN = -10000
 INT_MAX = 10000
-#Constants to be filled from front-end/weather from file
-NUMBER_OF_RACES = 10
-START_WEEK = 1
+NUMBER_OF_RACES = sys.argv[2] if len(sys.argv) >= 3 else 10
+START_WEEK = sys.argv[2] if len(sys.argv) >= 2 else 10
 END_WEEK = START_WEEK + NUMBER_OF_RACES
-NUMBER_OF_TEAMS = 10
 OPTIMUM_WEATHER = 23
 
+with open(f'{CURR_PATH}/tt_preferences.json', 'r') as j:
+     tt_preference_raw = json.loads(j.read())
 
-teams = [f'team-{i}' for i in range(NUMBER_OF_TEAMS)]
+with open(f'{CURR_PATH}/teams.json', 'r') as j:
+     teams_raw = json.loads(j.read())
 
-#Weather
-temp = pickle.load(open('./solver/weather.pkl', 'rb'))
-tracks = list(temp.keys())
-weather = {}
-for key, value in temp.items():
-    weather[key] = [-abs(int(i) - OPTIMUM_WEATHER) for i in value]
-####
-lat_lng = pd.read_csv('./solver/circuits.csv')
-lat_lng = lat_lng[['location', 'lat', 'lng']]
-lat_lng = lat_lng.drop_duplicates(subset='location')
+with open(f'{CURR_PATH}/at_preferences.json', 'r') as j:
+     at_preference_raw = json.loads(j.read())
 
-print("Solving")
+NUMBER_OF_TRACKS = len(at_preference_raw)
+
+teams = ['temp']*len(teams_raw)
+for i in teams_raw:
+    teams[i['value']] = i['label']
+
+tracks = list(tt_preference_raw[0])
 
 tt_preference = {}
 at_preference = {}
-for i in range(len(teams)):
-    tt_preference[teams[i]] = [random.randint(1,10) for j in range(len(tracks))]
+lat_lng = {}
 
-for i in tracks:
-    at_preference[i] = random.randint(1,10)
+
+for i in range(len(tt_preference_raw)):
+    tt_preference[teams[i]] = [0]*NUMBER_OF_TRACKS
+    for j in range(NUMBER_OF_TRACKS):
+        tt_preference[teams[i]][tracks.index(tt_preference_raw[i][j])] = NUMBER_OF_TRACKS - j
+
+for i in at_preference_raw.keys():
+    at_preference[i] = at_preference_raw[i]['pref']
+    lat_lng[i] = {'lat': at_preference_raw[i]['lat'], 'lng': at_preference_raw[i]['lng']}
+
+
+temp = pickle.load(open(f'{CURR_PATH}/weather.pkl', 'rb'))
+
+weather = {}
+for key, value in temp.items():
+    weather[key] = [-abs(int(i) - OPTIMUM_WEATHER) for i in value]
+
 
 
 # Solver
@@ -67,7 +83,7 @@ class Scheduler:
             distances[i] = {}
             for j in self.track_names:
                 if j != i:
-                    temp = -int(geodesic((lat_lng[lat_lng['location'] == i]['lat'].item(), lat_lng[lat_lng['location'] == i]['lng'].item()), (lat_lng[lat_lng['location'] == j]['lat'].item(), lat_lng[lat_lng['location'] == j]['lng'].item())).miles/100)
+                    temp = -int(geodesic((lat_lng[i]['lat'], lat_lng[i]['lng']), (lat_lng[j]['lat'], lat_lng[j]['lng'])).miles/100)
                     distances[i][j] = temp
 
         self.tt_preference = tt_preference
@@ -85,6 +101,31 @@ class Scheduler:
             model.AddElement(tracks_day[i], weather_list[self.track_names[i]], weather_score[i])
         self.weather_score = weather_score
         
+
+    def add_distance_preferences(self):
+        model = self.model
+        distances = self.distances
+        tracks_chosen = self.tracks_chosen
+        tracks_day = self.tracks_day
+        distance_total_pref = 0
+        for i in range(len(tracks)):
+            for j in range(i+1, len(tracks)):
+                d_pref = model.NewIntVar(INT_MIN, INT_MAX, f'dist-pref {i}')
+                consec_bool = model.NewBoolVar(f'bool consec - {i}-{j}')
+                abs = model.NewIntVar(0, INT_MAX, f'abs-{i}-{j}')
+                var = model.NewIntVar(INT_MIN, INT_MAX, f'temppp -{i} - {j}')
+                model.Add(var == tracks_day[i] - tracks_day[j])
+                model.AddAbsEquality(abs, var)
+                model.Add(abs == 1).OnlyEnforceIf(consec_bool)
+                model.Add(abs != 1).OnlyEnforceIf(consec_bool.Not())
+                anding = model.NewBoolVar(f'dist-pref-andw tracks {i} -{j}')
+                model.AddBoolAnd([tracks_chosen[i], tracks_chosen[j], consec_bool]).OnlyEnforceIf(anding)
+                model.AddBoolOr([tracks_chosen[i].Not(), tracks_chosen[j].Not(), consec_bool.Not()]).OnlyEnforceIf(anding.Not())
+                model.Add(d_pref == distances[tracks[i]][tracks[j]]).OnlyEnforceIf(anding)
+                model.Add(d_pref == 0).OnlyEnforceIf(anding.Not())
+                distance_total_pref += d_pref
+        self.distance_total_pref = distance_total_pref
+
 
     def add_track_preferences(self):
         tracks_day = []
@@ -109,36 +150,15 @@ class Scheduler:
         
 
 
-
-        
     def score_and_maximize(self):
         tracks = self.track_names
         model = self.model
-        distances = self.distances
+        distance_total_pref = self.distance_total_pref
         tracks_chosen = self.tracks_chosen
         weather_score = self.weather_score
         tt_preference_list = self.tt_preference_list
-        tracks_day = self.tracks_day
         score_tracks = [model.NewIntVar(0, INT_MAX, f'score-track-{i}') for i in range(len(tracks))]
         weather_total_pref = 0
-        distance_total_pref = 0
-        for i in range(len(tracks)):
-            for j in range(i+1, len(tracks)):
-                d_pref = model.NewIntVar(INT_MIN, INT_MAX, f'dist-pref {i}')
-                consec_bool = model.NewBoolVar(f'bool consec - {i}-{j}')
-                abs = model.NewIntVar(0, INT_MAX, f'abs-{i}-{j}')
-                var = model.NewIntVar(INT_MIN, INT_MAX, f'temppp -{i} - {j}')
-                model.Add(var == tracks_day[i] - tracks_day[j])
-                model.AddAbsEquality(abs, var)
-                model.Add(abs == 1).OnlyEnforceIf(consec_bool)
-                model.Add(abs != 1).OnlyEnforceIf(consec_bool.Not())
-                anding = model.NewBoolVar(f'dist-pref-andw tracks {i} -{j}')
-                model.AddBoolAnd([tracks_chosen[i], tracks_chosen[j], consec_bool]).OnlyEnforceIf(anding)
-                model.AddBoolOr([tracks_chosen[i].Not(), tracks_chosen[j].Not(), consec_bool.Not()]).OnlyEnforceIf(anding.Not())
-                model.Add(d_pref == distances[tracks[i]][tracks[j]]).OnlyEnforceIf(anding)
-                model.Add(d_pref == 0).OnlyEnforceIf(anding.Not())
-                distance_total_pref += d_pref
-
         for i in range(len(tracks)):
             t_pref = sum([tt_preference_list[j][i] for j in self.team_names]) + self.at_preference_list[self.track_names[i]]
             w_pref = model.NewIntVar(INT_MIN, INT_MAX, f'pref for w {i}')
@@ -157,7 +177,9 @@ class Scheduler:
         self.create_variables()
         self.add_track_preferences()
         self.add_weather_score()
+        self.add_distance_preferences()
         self.score_and_maximize()
+
         self.solver.parameters.max_time_in_seconds = MAX_RUNTIME
         output = self.solver.Solve(self.model)
         print(output)

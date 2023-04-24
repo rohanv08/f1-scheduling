@@ -1,18 +1,27 @@
 var express = require('express');
 var router = express.Router();
+const fs = require("fs");
 const spawn = require("child_process").spawn;
 router.post('/submit', function (req, res, next) {
-    const {test} = req.body;
-    console.log(req.body);
-    console.log("Here " + test);
-    const pythonProcess = spawn('python',['./solver/solver.py', test]);
+    for (const [key, value] of Object.entries(req.body)) {
+        if (key != "start_week" && key != "number_of_races") {
+            const data = JSON.stringify(value);
+            fs.writeFile(`./solver/${key}.txt`, data, (error) => {
+                if (error) {
+                  console.error(error);
+                  throw error;
+                }
+            });
+      }
+    }
+    
+    const pythonProcess = spawn('python',['./solver/solver.py', req.body.start_week, req.body.number_of_races]);
     pythonProcess.stdout.on('data', function(data) {
-        res.send(data.toString());
+        console.log(data.toString());
     });
     pythonProcess.stderr.on('data', (data) => {
         console.error(`stderr: ${data}`);
      });
-    
 })
 
 
