@@ -12,7 +12,6 @@ CURR_PATH = os.path.dirname(os.path.abspath(__file__))
 MAX_RUNTIME = 5
 INT_MIN = -10000
 INT_MAX = 10000
-print(sys.argv[1])
 NUMBER_OF_RACES = int(sys.argv[2])if len(sys.argv) >= 3 else 10
 START_WEEK = int(sys.argv[1]) if len(sys.argv) >= 2 else 10
 END_WEEK = START_WEEK + NUMBER_OF_RACES - 1
@@ -49,18 +48,23 @@ for i in at_preference_raw.keys():
     lat_lng[i] = {'lat': at_preference_raw[i]['lat'], 'lng': at_preference_raw[i]['lng']}
 
 
-#weather_raw = pickle.load(open(f'{CURR_PATH}/weather.pkl', 'rb'))
+weather_raw = pickle.load(open(f'{CURR_PATH}/weather.pkl', 'rb'))
 
 weather = {}
-weather_raw = {}
-# for key, value in temp.items():
-#     weather[key] = [-abs(int(i) - OPTIMUM_WEATHER) for i in value]
+for key, value in weather_raw.items():
+    weather[key] = [-abs(int(i) - OPTIMUM_WEATHER) for i in value]
 
-for i in tracks:
-    weather_raw[i] = [random.randint(1,10) for _ in range(365)]
+wset = set(weather.keys())
+print(len(wset))
+tset = set(tracks)
+print(len(tset))
+print(tset.difference(wset))
 
-for i in tracks:
-    weather[i] = [random.randint(1,10) for _ in range(365)]
+# for i in tracks:
+#     weather_raw[i] = [random.randint(1,10) for _ in range(365)]
+
+# for i in tracks:
+#     weather[i] = [random.randint(1,10) for _ in range(365)]
 
 
 
