@@ -23,6 +23,11 @@ Note that we're maximzing overall preference here, however, since a globally opt
 ## Output
 A tentative schedule with week, track, average weather during that week, distance traveled from the previous track, and an overall preference score.
 
+## Data Sources
+1. temp.csv: daily_temperature_1000_cities_1980_2020.csv from https://www.kaggle.com/datasets/hansukyang/temperature-history-of-1000-cities-1980-to-2020
+2. circuits.csv: circuits.csv from https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020
+3. team.csv: https://raw.githubusercontent.com/toUpperCase78/formula1-datasets/master/Formula1_2022season_teams.csv
+
 ## File Structure
 ```bash
 ├───backend
@@ -35,4 +40,9 @@ A tentative schedule with week, track, average weather during that week, distanc
 │       ├───components
 │       └───data
 └───data
+    ├───circuits.csv: Contains data about the different tracks
+    ├───formatting_data.ipynb: Jupyter notebook to format all data files 
+    ├───team.csv: Contains data about the teams we display 
+    └───temp.csv: Contains daily weather data about major cities from 1980
+
 ```
