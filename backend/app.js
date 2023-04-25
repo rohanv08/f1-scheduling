@@ -4,10 +4,11 @@ var bodyParser = require('body-parser')
 var logger = require('morgan');
 var fs = require("fs")
 var ip = require("ip");
+const port = 8080
 
 const ip_details = {
   "server_host": ip.address(),
-  "server_port":"8080"
+  "server_port":`${port}`
 }
 const ip_details_json = JSON.stringify(ip_details);
 fs.writeFile('../client/src/config.json', ip_details_json, (error) => {
@@ -17,10 +18,9 @@ fs.writeFile('../client/src/config.json', ip_details_json, (error) => {
   }
 })
 
-const port = 8080
+
 var app = express();
 var inputRouter = require('./routes/input');
-var resultsRouter = require('./routes/results');
 // Create a server object:
 
 app.use(bodyParser())
@@ -43,7 +43,6 @@ let allowCrossDomain = function(req, res, next) {
 app.use(allowCrossDomain);
 
 app.use('/', inputRouter)
-app.use('/results', resultsRouter)
 
 
 

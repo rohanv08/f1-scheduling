@@ -165,19 +165,25 @@ class Scheduler:
         weather_score = self.weather_score
         tt_preference_list = self.tt_preference_list
         solver = self.solver
-        score_tracks = [model.NewIntVar(0, INT_MAX, f'score-track-{i}') for i in range(len(tracks))]
+        score_tracks_team = [model.NewIntVar(0, INT_MAX, f'score-track-team-{i}') for i in range(len(tracks))]
+        score_tracks_audience = [model.NewIntVar(0, INT_MAX, f'score-track-audience-{i}') for i in range(len(tracks))]
         weather_total_pref = 0
+        total_team_pref = 0
         for i in range(len(tracks)):
-            t_pref = sum([tt_preference_list[j][i] for j in self.team_names]) + self.at_preference_list[self.track_names[i]]
+            t_pref = sum([tt_preference_list[j][i] for j in self.team_names])
+            a_pref = self.at_preference_list[self.track_names[i]]
             w_pref = model.NewIntVar(INT_MIN, INT_MAX, f'pref for w {i}')
             model.Add(w_pref == weather_score[i]).OnlyEnforceIf(tracks_chosen[i])
             model.Add(w_pref == 0).OnlyEnforceIf(tracks_chosen[i].Not())
-            model.Add(score_tracks[i] == t_pref).OnlyEnforceIf(tracks_chosen[i])
-            model.Add(score_tracks[i] == 0).OnlyEnforceIf(tracks_chosen[i].Not())
+            model.Add(score_tracks_team[i] == t_pref).OnlyEnforceIf(tracks_chosen[i])
+            model.Add(score_tracks_team[i] == 0).OnlyEnforceIf(tracks_chosen[i].Not())
+            model.Add(score_tracks_audience[i] == a_pref).OnlyEnforceIf(tracks_chosen[i])
+            model.Add(score_tracks_audience[i] == 0).OnlyEnforceIf(tracks_chosen[i].Not())
             weather_total_pref += w_pref 
         
         self.weather_total_pref = weather_total_pref
-        self.score_tracks = score_tracks
+        self.score_tracks_team = score_tracks_team
+        self.score_tracks_audience = score_tracks_audience
             
 
     def solve(self):
@@ -189,26 +195,30 @@ class Scheduler:
         self.add_weather_score()
         self.add_distance_preferences()
         self.score_and_maximize()
-        score_tracks = self.score_tracks
+        score_tracks_team = self.score_tracks_team
+        score_tracks_audience = self.score_tracks_audience
         weather_total_pref = self.weather_total_pref
         distance_total_pref = self.distance_total_pref
         soln = {}
         score = 0
 
-        self.model.Maximize(sum(score_tracks))
+        self.model.Maximize(sum(score_tracks_audience))
         self.solver.Solve(self.model)
         score += self.solver.ObjectiveValue()
-        self.model.Add(sum(score_tracks) >= self.solver.Value(sum(score_tracks)))
+        self.model.Add(sum(score_tracks_audience) >= self.solver.Value(sum(score_tracks_audience)))
+
+        self.model.Maximize(sum(score_tracks_team))
+        self.solver.Solve(self.model)
+        score += self.solver.ObjectiveValue()
+        self.model.Add(sum(score_tracks_team) >= self.solver.Value(sum(score_tracks_team)))
 
         
-
         self.model.Maximize(weather_total_pref)
         self.solver.Solve(self.model)
         score += self.solver.ObjectiveValue()
         self.model.Add(weather_total_pref >= self.solver.Value(weather_total_pref))
 
         self.model.Maximize(distance_total_pref)
-
         output = self.solver.Solve(self.model)
 
         
