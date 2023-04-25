@@ -15,7 +15,7 @@ router.post('/submit', function (req, res, next) {
       }
     }
     const pythonProcess = spawn('python',['./solver/solver.py', req.body.start_week, req.body.number_of_races]);
-    pythonProcess.on('exit', function() {
+    pythonProcess.on('close', function() {
         console.log("EXITED")
         fs.readFile('./solver/solution.json', function read(err, data) {
 

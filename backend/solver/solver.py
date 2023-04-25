@@ -9,7 +9,7 @@ import json
 import os
 
 CURR_PATH = os.path.dirname(os.path.abspath(__file__))
-MAX_RUNTIME = 5
+MAX_RUNTIME = 120
 INT_MIN = -10000
 INT_MAX = 10000
 NUMBER_OF_RACES = int(sys.argv[2])if len(sys.argv) >= 3 else 10
