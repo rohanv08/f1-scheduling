@@ -2,7 +2,7 @@
 Rohan Verma and Arnav Aggarwal
 
 ## Overview
-!(./presentation/picture/Slide2.PNG)
+![Overview](./presentation/picture/Slide2.PNG)
 
 ## Running Instructions
 1. Client (in the client folder)
