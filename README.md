@@ -28,6 +28,10 @@ A tentative schedule with week, track, average weather during that week, distanc
 2. circuits.csv: circuits.csv from https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020
 3. team.csv: https://raw.githubusercontent.com/toUpperCase78/formula1-datasets/master/Formula1_2022season_teams.csv
 
+## Stakeholder Analysis
+For the stakeholder analysis please refer to the presentation [here.](https://penno365-my.sharepoint.com/:p:/g/personal/arnavagg_upenn_edu/EQXwJDo1eYhOiTlAfGsMuP8BdlTnY_MvaR_DcS44wP01Tg?e=YG6RRm)
+
+
 ## File Structure
 ```bash
 ├───backend
@@ -57,5 +61,4 @@ A tentative schedule with week, track, average weather during that week, distanc
 
 ```
 
-## Stakeholder Analysis
-For the stakeholder analysis please refer to the presentation [here.](https://penno365-my.sharepoint.com/:p:/g/personal/arnavagg_upenn_edu/EQXwJDo1eYhOiTlAfGsMuP8BdlTnY_MvaR_DcS44wP01Tg?e=YG6RRm)
+
