@@ -56,3 +56,6 @@ A tentative schedule with week, track, average weather during that week, distanc
     └───temp.csv: Contains daily weather data about major cities from 1980
 
 ```
+
+## Stakeholder Analysis
+For the stakeholder analysis please refer to the presentation [here.](https://penno365-my.sharepoint.com/:p:/g/personal/arnavagg_upenn_edu/EQXwJDo1eYhOiTlAfGsMuP8BdlTnY_MvaR_DcS44wP01Tg?e=YG6RRm)
