@@ -10,9 +10,10 @@ import os
 print("solving")
 CURR_PATH = os.path.dirname(os.path.abspath(__file__))
 MAX_RUNTIME = 50
+DECAY_FACTOR = 1
 INT_MIN = -100000
 INT_MAX = 100000
-NUMBER_OF_RACES = int(sys.argv[2])if len(sys.argv) >= 3 else 15
+NUMBER_OF_RACES = int(sys.argv[2])if len(sys.argv) >= 3 else 20
 START_WEEK = int(sys.argv[1]) if len(sys.argv) >= 2 else 25
 END_WEEK = START_WEEK + NUMBER_OF_RACES - 1
 OPTIMUM_WEATHER = 25
@@ -73,6 +74,21 @@ class Scheduler:
         self.at_preference_list = at_preference
         self.weather_list = weather
     
+    def write_to_file (self, score):
+        soln = {}
+        for v in range(len(self.track_names)):
+                if self.solver.Value(self.tracks_chosen[v]) == 1:
+                    soln[self.solver.Value(self.tracks_day[v])] = {"track": self.track_names[v], "weather": weather_raw[self.track_names[v]][self.solver.Value(self.tracks_day[v])]}
+        keys = sorted(list(soln.keys()))
+        for i in range(1, len(keys)):
+            soln[keys[i]]['distance'] = self.distances[soln[keys[i]]['track']][soln[keys[i-1]]['track']]*-100
+        for i in range(1, 53):
+            if i not in keys:
+                soln[i] = {}
+        soln["Score"] = score
+        with open(f'{CURR_PATH}/solution.json', 'w') as fp:
+            json.dump(soln, fp)
+        print("Solution written to file!")
 
     def create_variables(self):
         model: cp_model.CpModel = self.model
@@ -198,14 +214,13 @@ class Scheduler:
         score_tracks_audience = self.score_tracks_audience
         weather_total_pref = self.weather_total_pref
         distance_total_pref = self.distance_total_pref
-        soln = {}
         score = 0
 
         self.model.Maximize(sum(score_tracks_audience))
         self.solver.Solve(self.model)
         score += self.solver.ObjectiveValue()
         print(score)
-        self.model.Add(sum(score_tracks_audience) >= int(self.solver.Value(sum(score_tracks_audience))*0.8))
+        self.model.Add(sum(score_tracks_audience) >= int(self.solver.Value(sum(score_tracks_audience))*DECAY_FACTOR))
 
         self.model.Maximize(sum(score_tracks_team))
         self.solver.Solve(self.model)
@@ -218,7 +233,12 @@ class Scheduler:
         self.solver.Solve(self.model)
         score += self.solver.ObjectiveValue()
         print(score)
-        self.model.Add(weather_total_pref >= self.solver.Value(weather_total_pref))
+        self.model.Add(weather_total_pref >= int(self.solver.Value(weather_total_pref)*DECAY_FACTOR))
+
+        ##Backup in case distance preference takes too long
+        self.write_to_file(score)
+
+
 
         self.model.Maximize(distance_total_pref)
         output = self.solver.Solve(self.model)
@@ -226,26 +246,16 @@ class Scheduler:
         print(self.solver.ObjectiveValue())
         
         if (output == cp_model.OPTIMAL or output == cp_model.FEASIBLE):
-            for v in range(len(self.track_names)):
-                if self.solver.Value(self.tracks_chosen[v]) == 1:
-                    soln[self.solver.Value(self.tracks_day[v])] = {"track": self.track_names[v], "weather": weather_raw[self.track_names[v]][self.solver.Value(self.tracks_day[v])]}
-            keys = sorted(list(soln.keys()))
-            for i in range(1, len(keys)):
-                soln[keys[i]]['distance'] = self.distances[soln[keys[i]]['track']][soln[keys[i-1]]['track']]*-100
-            for i in range(1, 53):
-                if i not in keys:
-                    soln[i] = {}
-            soln["Score"] = self.solver.ObjectiveValue() + score
-            with open(f'{CURR_PATH}/solution.json', 'w') as fp:
-                json.dump(soln, fp)
-            print("Solution written to file!")
+            self.write_to_file(self.solver.ObjectiveValue() + score)
+            sys.stdout.flush()
+            exit(0)
         else:
             print("Not Possible or too little time")
+            sys.stdout.flush()
             exit(1)
 
 
 scheduler = Scheduler(tracks, teams, tt_preference, at_preference, weather)
 scheduler.solve()
-sys.stdout.flush()
-exit(0)
+
 

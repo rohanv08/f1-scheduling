@@ -32,8 +32,8 @@ A tentative schedule with week, track, average weather during that week, distanc
 ## File Structure
 ```bash
 ├───backend
-│   ├───routes
-│   └───solver
+│   ├───routes: contains the routes for the backend server
+│   └───solver: contains the solver.py file that is eventually run through the node server. Also contains the weather.pkl for weather data. The json files in this folder are created once the server is run; they act as data communicators from the node server to the python child process. 
 ├───client
 │   ├───dist: Core sources and icons
 │   ├───res: Sorting icons to use for loader and the table

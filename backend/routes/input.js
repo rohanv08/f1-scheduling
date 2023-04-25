@@ -17,6 +17,7 @@ router.post('/submit', function (req, res, next) {
     const pythonProcess = spawn('python',['./solver/solver.py', req.body.start_week, req.body.number_of_races]);
 
     pythonProcess.stdout.on('data', function(data) {
+        console.log(data.toString())
         fs.readFile('./solver/solution.json', function read(err, data) {
 
             if (err) {
@@ -31,7 +32,12 @@ router.post('/submit', function (req, res, next) {
         console.error(`stderr: ${data}`);
     });
       pythonProcess.on('close', (code) => {
-        console.log(`Python process exited with code ${code}`);
+        if (code == 1) {
+            console.log(`There wasn't enough time to optimize distance`);
+        } else {
+          console.log("A feasible solution")
+        }
+        
       });
 })
 

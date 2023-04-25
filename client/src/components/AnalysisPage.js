@@ -16,7 +16,7 @@ const AnalysisPage = props => {
     const [characters, updateCharacters] = useState(circuits);
     const [label, updateLabel] = useState(0);
     const [preferences, updatePreferences] = useState(meta);
-    const [start, updateStart] = useState(15);
+    const [start, updateStart] = useState(10);
     const [race, updateRace] = useState(10);
     const [sol, updateSol] = useState(solution);
     const [isLoading, setIsLoading] = useState(false);
