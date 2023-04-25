@@ -22,3 +22,17 @@ Note that we're maximzing overall preference here, however, since a globally opt
 
 ## Output
 A tentative schedule with week, track, average weather during that week, distance traveled from the previous track, and an overall preference score.
+
+## File Structure
+```bash
+├───backend
+│   ├───routes
+│   └───solver
+├───client
+│   ├───dist
+│   ├───res
+│   └───src
+│       ├───components
+│       └───data
+└───data
+```
