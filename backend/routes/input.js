@@ -29,7 +29,7 @@ router.post('/submit', function (req, res, next) {
     })
     pythonProcess.stderr.on('data', (data) => {
         console.error(`stderr: ${data}`);
-      });
+    });
       pythonProcess.on('close', (code) => {
         console.log(`Python process exited with code ${code}`);
       });

@@ -10,14 +10,13 @@ import os
 print("solving")
 CURR_PATH = os.path.dirname(os.path.abspath(__file__))
 MAX_RUNTIME = 50
-INT_MIN = -10000
-INT_MAX = 10000
-NUMBER_OF_RACES = int(sys.argv[2])if len(sys.argv) >= 3 else 10
-START_WEEK = int(sys.argv[1]) if len(sys.argv) >= 2 else 20
+INT_MIN = -100000
+INT_MAX = 100000
+NUMBER_OF_RACES = int(sys.argv[2])if len(sys.argv) >= 3 else 15
+START_WEEK = int(sys.argv[1]) if len(sys.argv) >= 2 else 25
 END_WEEK = START_WEEK + NUMBER_OF_RACES - 1
 OPTIMUM_WEATHER = 25
 
-print("starting")
 with open(f'{CURR_PATH}/tt_preferences.json', 'r') as j:
         tt_preference_raw = json.loads(j.read())
 
@@ -131,6 +130,7 @@ class Scheduler:
                 model.Add(d_pref == distances[tracks[i]][tracks[j]]).OnlyEnforceIf(anding)
                 model.Add(d_pref == 0).OnlyEnforceIf(anding.Not())
                 distance_total_pref += d_pref
+                
         self.distance_total_pref = distance_total_pref
 
 
@@ -168,7 +168,6 @@ class Scheduler:
         score_tracks_team = [model.NewIntVar(0, INT_MAX, f'score-track-team-{i}') for i in range(len(tracks))]
         score_tracks_audience = [model.NewIntVar(0, INT_MAX, f'score-track-audience-{i}') for i in range(len(tracks))]
         weather_total_pref = 0
-        total_team_pref = 0
         for i in range(len(tracks)):
             t_pref = sum([tt_preference_list[j][i] for j in self.team_names])
             a_pref = self.at_preference_list[self.track_names[i]]
@@ -205,22 +204,26 @@ class Scheduler:
         self.model.Maximize(sum(score_tracks_audience))
         self.solver.Solve(self.model)
         score += self.solver.ObjectiveValue()
+        print(score)
         self.model.Add(sum(score_tracks_audience) >= self.solver.Value(sum(score_tracks_audience)))
 
         self.model.Maximize(sum(score_tracks_team))
         self.solver.Solve(self.model)
         score += self.solver.ObjectiveValue()
+        print(score)
         self.model.Add(sum(score_tracks_team) >= self.solver.Value(sum(score_tracks_team)))
 
         
         self.model.Maximize(weather_total_pref)
         self.solver.Solve(self.model)
         score += self.solver.ObjectiveValue()
+        print(score)
         self.model.Add(weather_total_pref >= self.solver.Value(weather_total_pref))
 
         self.model.Maximize(distance_total_pref)
         output = self.solver.Solve(self.model)
-
+        print(output)
+        print(self.solver.ObjectiveValue())
         
         if (output == cp_model.OPTIMAL or output == cp_model.FEASIBLE):
             for v in range(len(self.track_names)):
@@ -238,6 +241,7 @@ class Scheduler:
             print("Solution written to file!")
         else:
             print("Not Possible or too little time")
+            exit(1)
 
 
 scheduler = Scheduler(tracks, teams, tt_preference, at_preference, weather)
