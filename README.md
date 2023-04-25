@@ -34,11 +34,21 @@ A tentative schedule with week, track, average weather during that week, distanc
 │   ├───routes
 │   └───solver
 ├───client
-│   ├───dist
-│   ├───res
+│   ├───dist: Core sources and icons
+│   ├───res: Sorting icons to use for loader and the table
 │   └───src
 │       ├───components
-│       └───data
+|           ├───AnalysisPage.js: Main client-side page containing drag-and-drop element for team-track preferences and input boxes for latitude, longitude, and audience preferences for every track and input boxes for the start week and number of races. The page has a submit button that sends the data to the server and loads up the resulting overall solution score all with desired weeks, tracks, weather for that week and track, and distance from the previous track to the next. 
+|           ├───LoadingSpinner.js: Loading Element 
+|           └───spinner.css: Styling for the loading icon
+│       ├───data
+|           ├───circuits.json: Inital Random track preferences for each team
+|           ├───meta.json: Inital Audience preferences, latitude, and longitude for each track 
+|           ├───solution.json: Blank solution file to open at start 
+|           └───teams.json: List of teams
+│       ├───index.html: Main base HTML file 
+│       └───app.js: Main app that runs AnalysisPage
+│       └───fetchWithTimeout.js: Fetch to connect to backend
 └───data
     ├───circuits.csv: Contains data about the different tracks
     ├───formatting_data.ipynb: Jupyter notebook to format all data files 
