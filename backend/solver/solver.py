@@ -7,9 +7,9 @@ from geopy.distance import geodesic
 import sys
 import json
 import os
-
+print("solving")
 CURR_PATH = os.path.dirname(os.path.abspath(__file__))
-MAX_RUNTIME = 120
+MAX_RUNTIME = 10
 INT_MIN = -10000
 INT_MAX = 10000
 NUMBER_OF_RACES = int(sys.argv[2])if len(sys.argv) >= 3 else 10
@@ -17,6 +17,7 @@ START_WEEK = int(sys.argv[1]) if len(sys.argv) >= 2 else 20
 END_WEEK = START_WEEK + NUMBER_OF_RACES - 1
 OPTIMUM_WEATHER = 23
 
+print("starting")
 with open(f'{CURR_PATH}/tt_preferences.json', 'r') as j:
         tt_preference_raw = json.loads(j.read())
 
@@ -37,6 +38,7 @@ tracks = list(tt_preference_raw[0])
 tt_preference = {}
 at_preference = {}
 lat_lng = {}
+print("solving")
 
 for i in range(len(tt_preference_raw)):
     tt_preference[teams[i]] = [0]*NUMBER_OF_TRACKS
@@ -53,8 +55,13 @@ weather_raw_temp = pickle.load(open(f'{CURR_PATH}/weather.pkl', 'rb'))
 weather = {}
 weather_raw = {}
 for key, value in weather_raw_temp.items():
-    weather[key] = [-abs(int(i) - OPTIMUM_WEATHER) for i in value]
-    weather_raw[key]= [i for i in value]
+    weather[key] = []
+    weather_raw[key]= []
+    for i in range(1, 53):
+        avg = sum(value[(i-1)*7:i*7])/7
+        weather[key].append(-abs(int(avg) - OPTIMUM_WEATHER))
+        weather_raw[key].append(avg)
+    
 
 
 
@@ -188,8 +195,8 @@ class Scheduler:
                 if self.solver.Value(self.tracks_chosen[v]) == 1:
                     soln[self.solver.Value(self.tracks_day[v])] = {"track": self.track_names[v], "weather": weather_raw[self.track_names[v]][self.solver.Value(self.tracks_day[v])]}
             keys = sorted(list(soln.keys()))
-            for i in range(len(keys)-1):
-                soln[keys[i]]['distance'] = self.distances[soln[keys[i]]['track']][soln[keys[i+1]]['track']]*-100
+            for i in range(1, len(keys)):
+                soln[keys[i]]['distance'] = self.distances[soln[keys[i]]['track']][soln[keys[i-1]]['track']]*-100
             for i in range(1, 53):
                 if i not in keys:
                     soln[i] = {}
@@ -204,4 +211,5 @@ class Scheduler:
 scheduler = Scheduler(tracks, teams, tt_preference, at_preference, weather)
 scheduler.solve()
 sys.stdout.flush()
+exit(0)
 
