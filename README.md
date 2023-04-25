@@ -20,7 +20,7 @@
 3. Audience Track Preferences - The audience track preferences range from 1-10 and are given through the front end.
 4. Team Track Preferences - Each racing team ranks all 75 tracks from 1 - 75 and we assign a score of (NUMBER_OF_TRACKS - rank) to each track.
 
-Note that we're maximzing overall preference here, which is the sum of weather preference + distance preference + audience track + team track preference. We can also adjust the solver to give more weight to a particular constraint.
+Note that we're maximzing overall preference here, however, since a globally optimum solution is a time and resource intensive process, we cap the solver solve time to 50 seconds, and first maximize the audience track + team track preference, then the weather and then the distance. Note that each optimization builds upon the last and each runs for a maximum of 50 seconds.
 
 ## Output
 A tentative schedule with day, track, weather during that day, distance traveled from the previous track to here, and an overall preference score.

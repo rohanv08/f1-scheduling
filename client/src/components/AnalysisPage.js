@@ -78,10 +78,11 @@ const AnalysisPage = props => {
             "teams": teams,
             "start_week": start,
             "number_of_races": race
-          })
+          }),
+          timeout: 800000
         }
         setIsLoading(true);
-        fetchWithTimeout(server + 'submit', requestOptions, 200000).then((response) => response.json())
+        fetch(server + 'submit', requestOptions).then((response) => response.json())
         .then((json) => {buttonHandler(json)}).catch(() => {
           console.log("Unable to fetch user list");
           updateSol(solution);
