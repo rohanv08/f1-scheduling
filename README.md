@@ -35,8 +35,8 @@ A tentative schedule with week, track, average weather during that week, distanc
 │   ├───routes: contains the routes for the backend server
 │   └───solver
 |       ├───solver.py: Python script that is called by the backend solver to solve the optimization problem
-|        ├───*.json files: The json files in this folder are created once the server is run; they act as data communicators from the node server to the python child process and vice versa.
-|        ├───weather.pkl: File for weather data that is used by the solver
+|       ├───*.json files: The json files in this folder are created once the server is run; they act as data communicators from the node server to the python child process and vice versa.
+|       ├───weather.pkl: File for weather data that is used by the solver
 ├───client
 │   ├───dist: Core sources and icons
 │   ├───res: Sorting icons to use for loader and the table
