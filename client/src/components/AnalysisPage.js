@@ -8,6 +8,7 @@ import solution from '../data/solution.json';
 import { Button} from 'react-bootstrap';
 import {fetchWithTimeout} from '../fetchWithTimeout'
 import config from '../config.json'
+import LoadingSpinner from "./LoadingSpinner";
 
 const server = `http://${config.server_host}:${config.server_port}/`
 
@@ -18,7 +19,8 @@ const AnalysisPage = props => {
     const [start, updateStart] = useState(15);
     const [race, updateRace] = useState(10);
     const [sol, updateSol] = useState(solution);
-  
+    const [isLoading, setIsLoading] = useState(false);
+
     function handleOnDragEnd(result) {
       if (!result.destination) return;
   
@@ -60,6 +62,12 @@ const AnalysisPage = props => {
         callPreferences(trackName, name, value);
       }
     }
+
+    function buttonHandler(json){
+      updateSol(json); 
+      setIsLoading(false);
+    }
+
     function sendToSolver () {
         const requestOptions = {
           method: 'POST',
@@ -72,8 +80,14 @@ const AnalysisPage = props => {
             "number_of_races": race
           })
         }
+        setIsLoading(true);
         fetchWithTimeout(server + 'submit', requestOptions, 200000).then((response) => response.json())
-        .then((json) => {updateSol(json)})
+        .then((json) => {buttonHandler(json)}).catch(() => {
+          console.log("Unable to fetch user list");
+          updateSol(solution);
+          setIsLoading(false);
+       });
+ 
 
     }
   
@@ -88,20 +102,20 @@ const AnalysisPage = props => {
         tempMeta[trackName][name] = value
         updatePreferences(tempMeta);  
       }
-      this.forceUpdate();
+      forceUpdate();
     }
 
     function handleChange(e){
       updateLabel(e.value)
     }
-           
     
-    return (
+    const renderUser = (
       <div className="container" style={{display: "flex"}}>
         <div className="horizontal" style = {{paddingRight: "30px"}}>        
           <center><Button
             variant="primary" type="button"
-            onClick={() => sendToSolver()} >Submit to Solver!</Button></center><br></br>
+            onClick={() => sendToSolver()} 
+            disabled={isLoading}>Submit to Solver!</Button></center><br></br>
 
           Start Week: <input name="start"
             value={start}
@@ -185,7 +199,11 @@ const AnalysisPage = props => {
               </table>        
             </div>
           </div>
-      );    
+        );
+    return ( <div className="App">
+    {isLoading ? <LoadingSpinner /> : renderUser}
+  </div>
+);
 };
 
 export default AnalysisPage;

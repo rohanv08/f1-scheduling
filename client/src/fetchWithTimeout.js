@@ -5,9 +5,9 @@ export const fetchWithTimeout = (uri, options = {}, time) => {
     // Set a timeout limit for the request using `setTimeout`. If the body
     // of this timeout is reached before the request is completed, it will
     // be cancelled.
-    const timeout = setTimeout(() => {
-      controller.abort()
-    }, time)
+    // const timeout = setTimeout(() => {
+    //   controller.abort()
+    // }, time)
     return fetch(uri, config)
       .then((response) => {
   
