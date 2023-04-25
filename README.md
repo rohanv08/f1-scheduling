@@ -1,6 +1,9 @@
 # F1 Scheduling
 Rohan Verma and Arnav Aggarwal
 
+## Overview
+!(./presentation/picture/Slide2.PNG)
+
 ## Running Instructions
 1. Client (in the client folder)
 > npm install
@@ -28,10 +31,6 @@ A tentative schedule with week, track, average weather during that week, distanc
 2. circuits.csv: circuits.csv from https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020
 3. team.csv: https://raw.githubusercontent.com/toUpperCase78/formula1-datasets/master/Formula1_2022season_teams.csv
 
-## Stakeholder Analysis
-For the stakeholder analysis please refer to the presentation [here.](https://penno365-my.sharepoint.com/:p:/g/personal/arnavagg_upenn_edu/EQXwJDo1eYhOiTlAfGsMuP8BdlTnY_MvaR_DcS44wP01Tg?e=YG6RRm)
-
-
 ## File Structure
 ```bash
 ├───backend
@@ -53,12 +52,10 @@ For the stakeholder analysis please refer to the presentation [here.](https://pe
 │       ├───index.html: Main base HTML file 
 │       └───app.js: Main app that runs AnalysisPage
 │       └───fetchWithTimeout.js: Fetch to connect to backend
-└───data
-    ├───circuits.csv: Contains data about the different tracks
-    ├───formatting_data.ipynb: Jupyter notebook to format all data files 
-    ├───team.csv: Contains data about the teams we display 
-    └───temp.csv: Contains daily weather data about major cities from 1980
-
+├───data
+|   ├───circuits.csv: Contains data about the different tracks
+|   ├───formatting_data.ipynb: Jupyter notebook to format all data files 
+|   ├───team.csv: Contains data about the teams we display 
+|   └───temp.csv: Contains daily weather data about major cities from 1980
+└───presentation: class presentation and images
 ```
-
-
