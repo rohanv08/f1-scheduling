@@ -10,12 +10,16 @@ import os
 print("solving")
 CURR_PATH = os.path.dirname(os.path.abspath(__file__))
 MAX_RUNTIME = 50
-DECAY_FACTOR = 1
+## Decay factor essentially allows us to add some variation in the subsequent feature optimizations.
+## For instance it gives more room for weather/distance optimization as now we're good with any score for tracks/team preferences >= DECAY*BEST_POSSIBLE
+DECAY_FACTOR = 0.9
 INT_MIN = -100000
 INT_MAX = 100000
 NUMBER_OF_RACES = int(sys.argv[2])if len(sys.argv) >= 3 else 20
 START_WEEK = int(sys.argv[1]) if len(sys.argv) >= 2 else 25
 END_WEEK = START_WEEK + NUMBER_OF_RACES - 1
+
+#Note that the weather is in Celsius
 OPTIMUM_WEATHER = 25
 
 with open(f'{CURR_PATH}/tt_preferences.json', 'r') as j:
@@ -135,12 +139,12 @@ class Scheduler:
                 d_pref = model.NewIntVar(INT_MIN, INT_MAX, f'dist-pref {i}')
                 consec_bool = model.NewBoolVar(f'bool consec - {i}-{j}')
                 abs = model.NewIntVar(0, INT_MAX, f'abs-{i}-{j}')
-                var = model.NewIntVar(INT_MIN, INT_MAX, f'temppp -{i} - {j}')
+                var = model.NewIntVar(INT_MIN, INT_MAX, f'difference-{i} - {j}')
                 model.Add(var == tracks_day[i] - tracks_day[j])
                 model.AddAbsEquality(abs, var)
                 model.Add(abs == 1).OnlyEnforceIf(consec_bool)
                 model.Add(abs != 1).OnlyEnforceIf(consec_bool.Not())
-                anding = model.NewBoolVar(f'dist-pref-andw tracks {i} -{j}')
+                anding = model.NewBoolVar(f'dist-pref-and-tracks {i} -{j}')
                 model.AddBoolAnd([tracks_chosen[i], tracks_chosen[j], consec_bool]).OnlyEnforceIf(anding)
                 model.AddBoolOr([tracks_chosen[i].Not(), tracks_chosen[j].Not(), consec_bool.Not()]).OnlyEnforceIf(anding.Not())
                 model.Add(d_pref == distances[tracks[i]][tracks[j]]).OnlyEnforceIf(anding)
@@ -226,16 +230,18 @@ class Scheduler:
         self.solver.Solve(self.model)
         score += self.solver.ObjectiveValue()
         print(score)
-        self.model.Add(sum(score_tracks_team) >= self.solver.Value(sum(score_tracks_team)))
+        self.model.Add(sum(score_tracks_team) >= int(self.solver.Value(sum(score_tracks_team))*DECAY_FACTOR))
 
         
         self.model.Maximize(weather_total_pref)
         self.solver.Solve(self.model)
         score += self.solver.ObjectiveValue()
         print(score)
-        self.model.Add(weather_total_pref >= int(self.solver.Value(weather_total_pref)*DECAY_FACTOR))
+        ##Decay is 2-DECAY_FACTOR as the score is -ve
+        self.model.Add(weather_total_pref >= int(self.solver.Value(weather_total_pref)*(2-DECAY_FACTOR)))
 
-        ##Backup in case distance preference takes too long
+        ##Best solution possible with team, track preference + weather
+        ##Storing it because distance takes too much time sometimes so we optimize 
         self.write_to_file(score)
 
 
@@ -250,7 +256,7 @@ class Scheduler:
             sys.stdout.flush()
             exit(0)
         else:
-            print("Not Possible or too little time")
+            print(f"Not Possible or too little time. Code: {output}")
             sys.stdout.flush()
             exit(1)
 
