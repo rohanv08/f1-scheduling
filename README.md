@@ -1,7 +1,5 @@
 # F1 Scheduling
 Rohan Verma and Arnav Aggarwal
-
-## Overview
 ![Overview](./presentation/picture/Slide2.PNG)
 
 ## Running Instructions
