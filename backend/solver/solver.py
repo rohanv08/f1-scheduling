@@ -205,7 +205,7 @@ class Scheduler:
         self.solver.Solve(self.model)
         score += self.solver.ObjectiveValue()
         print(score)
-        self.model.Add(sum(score_tracks_audience) >= self.solver.Value(sum(score_tracks_audience)))
+        self.model.Add(sum(score_tracks_audience) >= int(self.solver.Value(sum(score_tracks_audience))*0.8))
 
         self.model.Maximize(sum(score_tracks_team))
         self.solver.Solve(self.model)
