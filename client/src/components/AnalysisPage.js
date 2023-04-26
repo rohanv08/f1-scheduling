@@ -6,7 +6,6 @@ import circuits from '../data/circuits.json';
 import meta from '../data/meta.json';
 import solution from '../data/solution.json';
 import { Button} from 'react-bootstrap';
-import {fetchWithTimeout} from '../fetchWithTimeout'
 import config from '../config.json'
 import LoadingSpinner from "./LoadingSpinner";
 
@@ -84,7 +83,7 @@ const AnalysisPage = props => {
         setIsLoading(true);
         fetch(server + 'submit', requestOptions).then((response) => response.json())
         .then((json) => {buttonHandler(json)}).catch(() => {
-          console.log("Unable to fetch user list");
+          console.log("Unable to fetch solver solution");
           updateSol(solution);
           setIsLoading(false);
        });
