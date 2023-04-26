@@ -181,8 +181,8 @@ const AnalysisPage = props => {
                   <tr>
                   <th>Week</th>
                   <th>Track</th>
-                  <th>Weather</th>
-                  <th>Distance</th>
+                  <th>Weather (Celsius)</th>
+                  <th>Distance (Miles)</th>
                   </tr>
                 </thead><tbody>
                   {Object.keys(sol).map((row) => {

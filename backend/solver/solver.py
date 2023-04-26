@@ -58,6 +58,7 @@ weather_raw_temp = pickle.load(open(f'{CURR_PATH}/weather.pkl', 'rb'))
 
 weather = {}
 weather_raw = {}
+distances_raw = {}
 for key, value in weather_raw_temp.items():
     weather[key] = []
     weather_raw[key]= []
@@ -85,7 +86,7 @@ class Scheduler:
                     soln[self.solver.Value(self.tracks_day[v])] = {"track": self.track_names[v], "weather": weather_raw[self.track_names[v]][self.solver.Value(self.tracks_day[v])]}
         keys = sorted(list(soln.keys()))
         for i in range(1, len(keys)):
-            soln[keys[i]]['distance'] = self.distances[soln[keys[i]]['track']][soln[keys[i-1]]['track']]*-100
+            soln[keys[i]]['distance'] = distances_raw[soln[keys[i]]['track']][soln[keys[i-1]]['track']]
         for i in range(1, 53):
             if i not in keys:
                 soln[i] = {}
@@ -107,10 +108,12 @@ class Scheduler:
             at_preference[i] = model.NewIntVar(at_preference_list[i], at_preference_list[i], f'audience track-{i}')
         for i in self.track_names:
             distances[i] = {}
+            distances_raw[i] = {}
             for j in self.track_names:
                 if j != i:
-                    temp = -int(geodesic((lat_lng[i]['lat'], lat_lng[i]['lng']), (lat_lng[j]['lat'], lat_lng[j]['lng'])).miles/100)
-                    distances[i][j] = temp
+                    temp = geodesic((lat_lng[i]['lat'], lat_lng[i]['lng']), (lat_lng[j]['lat'], lat_lng[j]['lng'])).miles
+                    distances[i][j] = -int(temp/100)
+                    distances_raw[i][j] = temp
 
         self.tt_preference = tt_preference
         self.at_preference = at_preference
